@@ -1,5 +1,8 @@
 package algonquin.cst2335.cst2335_finalproject;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -29,8 +32,9 @@ public class SearchedItem {
 
     public SearchedItem(){}
 
-    public SearchedItem(int id, String photographer, int height, int width, String url){
+    public SearchedItem(int id, byte[] image, String photographer, int height, int width, String url){
         this.id = id;
+        this.image = image;
         this.photographer = photographer;
         this.height = height;
         this.width = width;
@@ -39,6 +43,11 @@ public class SearchedItem {
 
     public byte[] getImage() {
         return image;
+    }
+
+    public Bitmap getImagePic() {
+        Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+        return bm;
     }
 
     public int getHeight() {

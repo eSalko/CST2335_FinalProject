@@ -10,6 +10,7 @@ import androidx.room.Room;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -30,12 +31,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityMainBinding;
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityPexelsBinding;
@@ -50,7 +54,7 @@ public class Pexels extends AppCompatActivity {
     SearchedItemDAO iDAO;
     Bitmap image = null;
     RequestQueue queue = null;
-
+    byte[] imageData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +69,18 @@ public class Pexels extends AppCompatActivity {
         ItemDatabase db = Room.databaseBuilder(getApplicationContext(), ItemDatabase.class, "database-name").build();
         iDAO = db.siDAO();
 
+        queue = Volley.newRequestQueue(this);
+        if(items == null){
+            pexelModel.items.setValue(items = new ArrayList<>());
+
+            Executor thread = Executors.newSingleThreadExecutor();
+            thread.execute(()->{
+                items.addAll(iDAO.getAllItems());
+
+                runOnUiThread(() -> binding.queryView.setAdapter(myAdapter));
+            });
+        }
+
         binding.searchBtn.setOnClickListener(clk -> {
             String searchQuery = binding.queryEdit.getText().toString();
             String stringURL = "";
@@ -75,37 +91,38 @@ public class Pexels extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            SearchedItem obj = new SearchedItem(1,"heloo", 2,3, "fea");
-            items.add(obj);
-            runOnUiThread(()->{
-                binding.queryView.setAdapter(myAdapter);
-
-            });
-            myAdapter.notifyItemInserted(items.size()-1);
-
-            /*JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, stringURL, null, new Response.Listener<JSONObject>() {
-
+            StringRequest request = new StringRequest
+                    (Request.Method.GET, stringURL, new Response.Listener<String>() {
 
                         @Override
-                        public void onResponse(JSONObject response) {
+                        public void onResponse(String response) {
                             try {
-                                JSONArray photos = response.getJSONArray("photos");
+                                JSONObject jsonObject = new JSONObject(response);
+                                JSONArray photos = jsonObject.getJSONArray("photos");
                                 JSONObject position0 = photos.getJSONObject(0);
                                 int id = position0.getInt("id");
                                 String photographer = position0.getString("photographer");
                                 int height = position0.getInt("height");
                                 int width = position0.getInt("width");
-                                JSONObject src = position0.getJSONObject("src");
-                                String imageURL = src.getString("original");
 
+                                JSONObject src = position0.getJSONObject("src");
+                                String imageURL = src.getString("tiny");
                                 ImageRequest imgReq = new ImageRequest(imageURL, new Response.Listener<Bitmap>() {
                                     @Override
                                     public void onResponse(Bitmap bitmap) {
                                         try {
                                             image = bitmap;
+                                            ByteArrayOutputStream b = new ByteArrayOutputStream();
                                             image.compress(Bitmap.CompressFormat.PNG, 100, Pexels.this.openFileOutput(id + ".png", Activity.MODE_PRIVATE));
+                                            image.compress(Bitmap.CompressFormat.PNG, 100, b);
+                                            imageData = b.toByteArray();
+                                            SearchedItem obj = new SearchedItem(id,imageData,photographer,height,width,imageURL);
+                                            items.add(obj);
+                                            runOnUiThread(()->{
+                                                binding.queryView.setAdapter(myAdapter);
 
+                                            });
+                                            myAdapter.notifyItemInserted(items.size()-1);
                                         } catch (IOException e) {
                                             e.printStackTrace();
 
@@ -115,23 +132,18 @@ public class Pexels extends AppCompatActivity {
                                 }, 1024, 1024, ImageView.ScaleType.CENTER, null, (error ) -> {
 
                                 });
+                                queue.add(imgReq);
 
-                                SearchedItem obj = new SearchedItem(id,photographer,height,width,imageURL);
-                                items.add(obj);
-                                runOnUiThread(()->{
-                                    binding.queryView.setAdapter(myAdapter);
 
-                                });
-                                myAdapter.notifyItemInserted(items.size()-1);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
+
                     }, new Response.ErrorListener() {
 
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            // TODO: Handle error
 
                         }
                     }) {
@@ -142,7 +154,8 @@ public class Pexels extends AppCompatActivity {
 
                     return header;
                 }
-            };*/
+            };
+            queue.add(request);
 
         });
 
@@ -157,9 +170,11 @@ public class Pexels extends AppCompatActivity {
             @Override
             public void onBindViewHolder(@NonNull MyRowHolder holder, int position) {
                 holder.photographer.setText("");
+                holder.photo.setImageBitmap(null);
 
                 SearchedItem obj = items.get(0);
                 holder.photographer.setText(obj.getPhotographer());
+                holder.photo.setImageBitmap(obj.getImagePic());
             }
 
 
@@ -176,11 +191,13 @@ public class Pexels extends AppCompatActivity {
     }
 
     class MyRowHolder extends RecyclerView.ViewHolder {
+        ImageView photo;
         TextView photographer;
 
         public MyRowHolder(@NonNull View itemView){
             super(itemView);
 
+            photo = itemView.findViewById(R.id.imageView);
             photographer = itemView.findViewById(R.id.photographerText);
         }
 
