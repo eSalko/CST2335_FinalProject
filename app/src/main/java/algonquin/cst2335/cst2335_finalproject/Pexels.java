@@ -2,6 +2,8 @@ package algonquin.cst2335.cst2335_finalproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +12,7 @@ import androidx.room.Room;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -189,6 +192,14 @@ public class Pexels extends AppCompatActivity {
 
         binding.queryView.setLayoutManager(new LinearLayoutManager(this));
 
+        pexelModel.selectedItem.observe(this, (newItemValue) -> {
+            FragmentManager fMgr = getSupportFragmentManager();
+            FragmentTransaction tx = fMgr.beginTransaction();
+            ItemDetailsFragment chatFragment = new ItemDetailsFragment(newItemValue);
+
+            tx.replace(R.id.fragmentLayout, chatFragment);
+            tx.commit();
+        });
 
 
     }
@@ -199,6 +210,13 @@ public class Pexels extends AppCompatActivity {
 
         public MyRowHolder(@NonNull View itemView){
             super(itemView);
+
+            itemView.setOnClickListener(clk->{
+                int position = getAbsoluteAdapterPosition();
+                SearchedItem selected = items.get(position);
+
+                pexelModel.selectedItem.postValue(selected);
+            });
 
             photo = itemView.findViewById(R.id.imageView);
             photographer = itemView.findViewById(R.id.photographerText);
