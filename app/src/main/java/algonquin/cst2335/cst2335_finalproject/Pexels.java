@@ -99,45 +99,48 @@ public class Pexels extends AppCompatActivity {
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
                                 JSONArray photos = jsonObject.getJSONArray("photos");
-                                JSONObject position0 = photos.getJSONObject(0);
-                                int id = position0.getInt("id");
-                                String photographer = position0.getString("photographer");
-                                int height = position0.getInt("height");
-                                int width = position0.getInt("width");
+                                for(int i=0;i< photos.length();i++){
+                                    JSONObject objectAtI = photos.getJSONObject(i);
+                                    int id = objectAtI.getInt("id");
+                                    String photographer = objectAtI.getString("photographer");
+                                    int height = objectAtI.getInt("height");
+                                    int width = objectAtI.getInt("width");
+                                    JSONObject src = objectAtI.getJSONObject("src");
+                                    String imageURL = src.getString("tiny");
+                                    ImageRequest imgReq = new ImageRequest(imageURL, new Response.Listener<Bitmap>() {
+                                        @Override
+                                        public void onResponse(Bitmap bitmap) {
+                                            try {
+                                                image = bitmap;
+                                                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                                                image.compress(Bitmap.CompressFormat.PNG, 100, Pexels.this.openFileOutput(id + ".png", Activity.MODE_PRIVATE));
+                                                image.compress(Bitmap.CompressFormat.PNG, 100, b);
+                                                imageData = b.toByteArray();
 
-                                JSONObject src = position0.getJSONObject("src");
-                                String imageURL = src.getString("tiny");
-                                ImageRequest imgReq = new ImageRequest(imageURL, new Response.Listener<Bitmap>() {
-                                    @Override
-                                    public void onResponse(Bitmap bitmap) {
-                                        try {
-                                            image = bitmap;
-                                            ByteArrayOutputStream b = new ByteArrayOutputStream();
-                                            image.compress(Bitmap.CompressFormat.PNG, 100, Pexels.this.openFileOutput(id + ".png", Activity.MODE_PRIVATE));
-                                            image.compress(Bitmap.CompressFormat.PNG, 100, b);
-                                            imageData = b.toByteArray();
-                                            SearchedItem obj = new SearchedItem(id,imageData,photographer,height,width,imageURL);
-                                            items.add(obj);
-                                            runOnUiThread(()->{
-                                                binding.queryView.setAdapter(myAdapter);
+                                                SearchedItem obj = new SearchedItem(id,imageData,photographer,height,width,imageURL);
+                                                items.add(obj);
+                                                runOnUiThread(()->{
+                                                    binding.queryView.setAdapter(myAdapter);
 
-                                            });
-                                            myAdapter.notifyItemInserted(items.size()-1);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+                                                });
+                                                myAdapter.notifyItemInserted(items.size()-1);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+
+                                            }
 
                                         }
+                                    }, 1024, 1024, ImageView.ScaleType.CENTER, null, (error ) -> {
 
-                                    }
-                                }, 1024, 1024, ImageView.ScaleType.CENTER, null, (error ) -> {
+                                    });
+                                    queue.add(imgReq);
 
-                                });
-                                queue.add(imgReq);
-
+                                }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+
                         }
 
                     }, new Response.ErrorListener() {
@@ -172,7 +175,7 @@ public class Pexels extends AppCompatActivity {
                 holder.photographer.setText("");
                 holder.photo.setImageBitmap(null);
 
-                SearchedItem obj = items.get(0);
+                SearchedItem obj = items.get(position);
                 holder.photographer.setText(obj.getPhotographer());
                 holder.photo.setImageBitmap(obj.getImagePic());
             }
