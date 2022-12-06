@@ -10,12 +10,21 @@ import java.util.List;
 @Dao
 public interface SearchedItemDAO {
 
+    /**
+     * Inserts SearchedItem into database
+     * */
     @Insert
     void insertItem(SearchedItem i);
 
+    /**
+     * Retrieves all SearchedItem objects from database
+     * */
     @Query("SELECT * FROM SearchedItem")
     List<SearchedItem> getAllItems();
 
+    /**
+     * Deletes SearchedItem from database
+     * */
     @Delete
     void deleteItem(SearchedItem i);
 }

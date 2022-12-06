@@ -10,10 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -50,14 +55,58 @@ import algonquin.cst2335.cst2335_finalproject.databinding.SearchedItemBinding;
 
 public class Pexels extends AppCompatActivity {
 
+    /**
+     * Variable binding to access layout items for activity_pexels.xml
+     * */
     ActivityPexelsBinding binding;
+    /**
+     * ViewModel for main pexels activity
+     * */
     PexelsViewModel pexelModel;
+    /**
+     * Array of items loaded from Pexels API
+     * */
     ArrayList<SearchedItem> items = new ArrayList<>();
+    /**
+     * RecyclerView Adapter to render items inside it
+     * */
     RecyclerView.Adapter myAdapter;
-    SearchedItemDAO iDAO;
+    /**
+     * Static DAO variable to access database across activities
+     * */
+    static SearchedItemDAO iDAO;
+    /**
+     * Bitmap of image requested from Pexels API
+     * */
     Bitmap image = null;
+    /**
+     * RequestQueue variable for Volley requests
+     * */
     RequestQueue queue = null;
+    /**
+     * Byte array to store converted Bitmap so that it can be put into BLOB in the database
+     * */
     byte[] imageData = null;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.activity_menu, menu);
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.favImgs:
+                Intent i = new Intent(this, FavPexels.class);
+                startActivity(i);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,18 +124,19 @@ public class Pexels extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
         if(items == null){
             pexelModel.items.setValue(items = new ArrayList<>());
-
-            Executor thread = Executors.newSingleThreadExecutor();
-            thread.execute(()->{
-                items.addAll(iDAO.getAllItems());
-
-                runOnUiThread(() -> binding.queryView.setAdapter(myAdapter));
-            });
         }
+
+        setSupportActionBar(binding.toolBar);
+
+        SharedPreferences prefs = getSharedPreferences("MyData", Context.MODE_PRIVATE);
 
         binding.searchBtn.setOnClickListener(clk -> {
             String searchQuery = binding.queryEdit.getText().toString();
             String stringURL = "";
+
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("QueryText", searchQuery);
+            editor.apply();
 
             try {
                 stringURL = "https://api.pexels.com/v1/search?query=" + URLEncoder.encode(searchQuery, "UTF-8");
@@ -165,6 +215,9 @@ public class Pexels extends AppCompatActivity {
 
         });
 
+        String initialQuery = prefs.getString("QueryText", "");
+        binding.queryEdit.setText(initialQuery);
+
         binding.queryView.setAdapter(myAdapter = new RecyclerView.Adapter<MyRowHolder>() {
             @NonNull
             @Override
@@ -195,11 +248,12 @@ public class Pexels extends AppCompatActivity {
         pexelModel.selectedItem.observe(this, (newItemValue) -> {
             FragmentManager fMgr = getSupportFragmentManager();
             FragmentTransaction tx = fMgr.beginTransaction();
-            ItemDetailsFragment chatFragment = new ItemDetailsFragment(newItemValue);
+            ItemDetailsFragment chatFragment = new ItemDetailsFragment(newItemValue, iDAO);
 
             tx.replace(R.id.fragmentLayout, chatFragment);
             tx.commit();
         });
+
 
 
     }
