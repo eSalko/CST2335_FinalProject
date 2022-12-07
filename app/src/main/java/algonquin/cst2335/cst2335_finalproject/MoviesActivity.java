@@ -29,6 +29,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,18 +124,12 @@ public class MoviesActivity extends AppCompatActivity {
                                 queue.add(imgReq);
                             }
                             runOnUiThread(() ->{
-
-                                /*
-                                MovieDetails md = new MovieDetails("Title",title);
-                                details.add(md);
-                                myAdapter.notifyItemInserted(details.size()-1);
-                                binding2.TextView.setText("Title: " + title);
-                                */
+                               MovieInfo mi = new MovieInfo(title,year,rated,runtime,director,actors,plot);
+                               details.add(mi);
                                 binding.poster.setImageBitmap(image);
-                                binding.test.setText(plot);
+                                binding.test.setText(title);
 
                             });
-                            Toast.makeText(getApplicationContext(),"This is the title value"+title,Toast.LENGTH_SHORT).show();
                         }catch (JSONException e){
                             e.printStackTrace();
                         }
@@ -156,10 +151,22 @@ public class MoviesActivity extends AppCompatActivity {
 
             @Override
             public void onBindViewHolder(@NonNull MyRowHolder holder, int position) {
-                holder.content.setText("");
+                holder.mTitle.setText("");
+                holder.mYear.setText("");
+                holder.mRated.setText("");
+                holder.mRuntime.setText("");
+                holder.mDirector.setText("");
+                holder.mActors.setText("");
+                holder.mPlot.setText("");
                 MovieInfo obj = details.get(position);
-                holder.content.setText(obj.getTitle());
-                //add others?
+                holder.mTitle.setText(obj.getTitle());
+                holder.mYear.setText(obj.getYear());
+                holder.mRated.setText(obj.getRated());
+                holder.mRuntime.setText(obj.getRuntime());
+                holder.mDirector.setText(obj.getDirector());
+                holder.mActors.setText(obj.getActors());
+                holder.mPlot.setText(obj.getPlot());
+
             }
 
             @Override
@@ -172,10 +179,22 @@ public class MoviesActivity extends AppCompatActivity {
     }
 
     class MyRowHolder extends RecyclerView.ViewHolder{
-        TextView content;
+        TextView mTitle;
+        TextView mYear;
+        TextView mRated;
+        TextView mRuntime;
+        TextView mDirector;
+        TextView mActors;
+        TextView mPlot;
         public MyRowHolder(@NonNull View itemView){
             super(itemView);
-            content = itemView.findViewById(R.id.TextView);
+            mTitle = itemView.findViewById(R.id.title);
+            mYear = itemView.findViewById(R.id.year);
+            mRated = itemView.findViewById(R.id.rated);
+            mRuntime = itemView.findViewById(R.id.runtime);
+            mDirector = itemView.findViewById(R.id.director);
+            mActors = itemView.findViewById(R.id.actors);
+            mPlot = itemView.findViewById(R.id.plot);
         }
     }
 }
