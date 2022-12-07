@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CST2335_FinalProject</string>
+    <string name="hint_text">Entrez votre requête de recherche ici</string>
+    <string name="search_text">"Recherchez quelque chose ci-dessous : "</string>
+    <string name="search_btn">Recherche Pexels</string>
+    <string name="fav_text">Allez dans vos favoris</string>
+    <string name="about_text">À propos</string>
+</resources>
