@@ -11,11 +11,11 @@ import java.util.List;
 public interface matchDAO {
 
     @Insert
-    public void insertMatch(match m);
+    public void insertMatch(Match m);
 
-    @Query("SELECT * FROM `match`")
-    public List<match> getAllMatches();
+    @Query("SELECT * FROM `Match`")
+    public List<Match> getAllMatches();
 
     @Delete
-    void deleteMatch(match i);
+    void deleteMatch(Match i);
 }

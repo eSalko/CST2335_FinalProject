@@ -6,23 +6,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.service.autofill.FieldClassification;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -30,7 +25,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -38,21 +32,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RecursiveAction;
 
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityHighlightsBinding;
-import algonquin.cst2335.cst2335_finalproject.databinding.GameTitleBinding;
 
 public class HighlightsActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    ArrayList<match> matches;
+    ArrayList<Match> Matches;
     MatchViewModel matchModel;
     matchDAO mDAO;
-    String urlButton;
     private static String stringURL = "https://www.scorebat.com/video-api/v1/";
     private RecyclerView.Adapter myAdapter;
 
@@ -63,26 +53,25 @@ public class HighlightsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         ActivityHighlightsBinding binding = ActivityHighlightsBinding.inflate(getLayoutInflater());
         setSupportActionBar(binding.toolBar);
-        matches = new ArrayList<match>();
+        Matches = new ArrayList<Match>();
 
         //db
         MatchDB db = Room.databaseBuilder(getApplicationContext(), MatchDB.class, "Match Database").build();
         mDAO = db.mDAO();
 
-        if(matches == null) {
-            matchModel.matches.setValue(matches = new ArrayList<>());
+        matchModel = new ViewModelProvider(this).get(MatchViewModel.class);
+        Matches = matchModel.matches.getValue();
+
+        if(Matches == null) {
+            matchModel.matches.setValue(Matches = new ArrayList<>());
             Executor thread = Executors.newSingleThreadExecutor();
 
             thread.execute(() ->{
-                matches.addAll(mDAO.getAllMatches());
+                Matches.addAll(mDAO.getAllMatches());
                 binding.recyclerView.setAdapter(myAdapter);
             });
         }
-//        matchModel.selectedMatch.observe(this, (newItemValue) -> {
-//            FragmentManager fMgr = getSupportFragmentManager();
-//            FragmentTransaction tx = fMgr.beginTransaction();
-//            matchDetailsFragment chatFragment = new matchDetailsFragment(newItemValue);
-//        });
+
 
 
         binding.urlBtn.setOnClickListener(clk -> {
@@ -103,6 +92,14 @@ public class HighlightsActivity extends AppCompatActivity {
             extractMatches();
 //            adapter.notifyItemInserted(position);
         });
+
+        matchModel.selectedMatch.observe(this, (newItemValue) -> {
+            FragmentManager fMgr = getSupportFragmentManager();
+            FragmentTransaction tx = fMgr.beginTransaction();
+            matchDetailsFragment matchFragment = new matchDetailsFragment(newItemValue);
+            tx.replace(R.id.fragment, matchFragment);
+            tx.commit();
+        });
     }//end of onCreate
 
     private void extractMatches() {
@@ -114,13 +111,13 @@ public class HighlightsActivity extends AppCompatActivity {
                     try {
                         JSONObject matchObject = response.getJSONObject(r);
 
-                        match match = new match();
+                        Match match = new Match();
                         match.setMatchTitle(matchObject.getString("title"));
                         match.setMatchDate(matchObject.getString("date"));
                         match.setComp(matchObject.getJSONObject("competition").getString("name"));
                         match.setUrl(matchObject.getString("url"));
 
-                        matches.add(match);
+                        Matches.add(match);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -128,7 +125,7 @@ public class HighlightsActivity extends AppCompatActivity {
                 }
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                Adapter adapter = new Adapter(getApplicationContext(), matches);
+                Adapter adapter = new Adapter(getApplicationContext(), Matches, matchModel);
                 recyclerView.setAdapter(adapter);
             }
         }, new Response.ErrorListener() {

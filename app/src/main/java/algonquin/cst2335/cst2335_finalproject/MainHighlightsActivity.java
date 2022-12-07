@@ -10,23 +10,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.snackbar.Snackbar;
+import algonquin.cst2335.cst2335_finalproject.databinding.ActivityHighlightsMainBinding;
 
-import algonquin.cst2335.cst2335_finalproject.databinding.ActivityMainBinding;
-
-public class MainActivity extends AppCompatActivity {
-    private static String TAG = "MainActivity";
+public class MainHighlightsActivity extends AppCompatActivity {
+    private static String TAG = "MainHighlightsActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_highlights_main);
         //binding
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        ActivityHighlightsMainBinding binding = ActivityHighlightsMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         //toolbar
         setSupportActionBar(binding.toolBar);
         //button intent
-        Intent nextPage = new Intent(MainActivity.this, HighlightsActivity.class);
+        Intent nextPage = new Intent(MainHighlightsActivity.this, HighlightsActivity.class);
 
 
         binding.button.setOnClickListener(click -> {

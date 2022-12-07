@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 
 public class MatchViewModel extends ViewModel {
-    public MutableLiveData<ArrayList<match>> matches = new MutableLiveData<>();
-    public MutableLiveData<match> selectedMatch = new MutableLiveData<>();
+    public MutableLiveData<ArrayList<Match>> matches = new MutableLiveData<>();
+    public MutableLiveData<Match> selectedMatch = new MutableLiveData<>();
 
 }

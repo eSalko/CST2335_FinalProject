@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment;
 import algonquin.cst2335.cst2335_finalproject.databinding.DetailsLayoutBinding;
 
 public class matchDetailsFragment extends Fragment {
-    match selected;
-    public matchDetailsFragment(match i){selected = i;}
+    Match selected;
+    public matchDetailsFragment(Match i){selected = i;}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

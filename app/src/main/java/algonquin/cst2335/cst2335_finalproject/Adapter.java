@@ -1,6 +1,5 @@
 package algonquin.cst2335.cst2335_finalproject;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +14,13 @@ import java.util.List;
 public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>{
 
     LayoutInflater inflater;
-    List<match> matches;
+    List<Match> matches;
+    MatchViewModel matchModel;
 
-    public Adapter(Context cxt, List<match> matches){
+    public Adapter(Context cxt, List<Match> Matches, MatchViewModel matchModel){
         this.inflater = LayoutInflater.from(cxt);
-        this.matches = matches;
+        this.matches = Matches;
+        this.matchModel = matchModel;
     }
 
 
@@ -50,6 +51,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>{
 
             itemView.setOnClickListener(clk -> {
                 int position = getAbsoluteAdapterPosition();
+                Match selected = matches.get(position);
+
+                matchModel.selectedMatch.postValue(selected);
 
             });
 

@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey;
 import java.util.List;
 
 @Entity
-public class match {
+public class Match {
 
     @PrimaryKey
     int id;
@@ -28,12 +28,12 @@ public class match {
 
 
 
-    public match() {
+    public Match() {
         //default empty constructor
     }
 
 
-    public match(String matchTitle, String matchDate, String comp, String url){
+    public Match(String matchTitle, String matchDate, String comp, String url){
         this.matchTitle = matchTitle;
         this.matchDate = matchDate;
         this.comp = comp;
