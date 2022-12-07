@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="algonquin.cst2335.cst2335_finalproject">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,7 +16,14 @@
         android:theme="@style/Theme.CST2335_FinalProject"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".FavPexels"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".Pexels"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
