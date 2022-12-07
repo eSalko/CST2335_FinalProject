@@ -10,27 +10,20 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
-
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -67,21 +60,16 @@ public class HighlightsActivity extends AppCompatActivity {
             Executor thread = Executors.newSingleThreadExecutor();
 
             thread.execute(() ->{
-                Matches.addAll(mDAO.getAllMatches());
+//                Matches.addAll(mDAO.getAllMatches());
                 binding.recyclerView.setAdapter(myAdapter);
             });
         }
 
 
 
-        binding.urlBtn.setOnClickListener(clk -> {
-            try {
-                Intent urlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(stringURL));
-                startActivity(urlIntent);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, "Cannot launch url/url not found", Toast.LENGTH_LONG).show();
-                e.printStackTrace();
-            }
+        binding.favBtn.setOnClickListener(clk -> {
+
+
 
         });
 

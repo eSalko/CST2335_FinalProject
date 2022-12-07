@@ -48,10 +48,10 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/urlBtn"
+        android:id="@+id/favBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="url_Btn"
+        android:text="favourite"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/getMatchBtn" />
