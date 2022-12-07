@@ -6,5 +6,5 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 
 public class MovieViewModel extends ViewModel {
-    public MutableLiveData<ArrayList<MovieDetails>> md = new MutableLiveData<>();
+    public MutableLiveData<ArrayList<MovieInfo>> md = new MutableLiveData<>();
 }

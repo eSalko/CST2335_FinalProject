@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -34,6 +35,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityMovieBinding;
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityMovieInformationBinding;
@@ -43,9 +46,10 @@ public class MoviesActivity extends AppCompatActivity {
     ActivityMovieInformationBinding binding2;
     protected RequestQueue queue = null;
     Bitmap image;
-    ArrayList<MovieDetails> details;
+    ArrayList<MovieInfo> details;
     private RecyclerView.Adapter myAdapter;
     MovieViewModel movieModel;
+    MovieDao mDao;
 
 
 
@@ -53,15 +57,24 @@ public class MoviesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         binding = ActivityMovieBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         movieModel = new ViewModelProvider(this).get(MovieViewModel.class);
         details = movieModel.md.getValue();
 
+        MovieDatabase md = Room.databaseBuilder(getApplicationContext(), MovieDatabase.class, "database-name").build();
+        mDao = md.mDao();
+
         if(details == null){
             movieModel.md.postValue(details = new ArrayList<>());
+            Executor thread = Executors.newSingleThreadExecutor();
+
+            thread.execute(() ->
+            {
+                details.addAll(mDao.getAllMovies());
+                runOnUiThread( () ->  binding.RecyclerView.setAdapter( myAdapter ));
+            });
         }
 
         queue = Volley.newRequestQueue(this);
@@ -81,7 +94,6 @@ public class MoviesActivity extends AppCompatActivity {
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, stringURL, null,
                     (response) -> {
                         try{
-                            JSONObject movieInfo = response.getJSONObject("title");
                             String title = response.getString("Title");
                             String year = response.getString("Year");
                             String rated = response.getString("Rated");
@@ -111,6 +123,7 @@ public class MoviesActivity extends AppCompatActivity {
                                 queue.add(imgReq);
                             }
                             runOnUiThread(() ->{
+
                                 /*
                                 MovieDetails md = new MovieDetails("Title",title);
                                 details.add(md);
@@ -118,7 +131,7 @@ public class MoviesActivity extends AppCompatActivity {
                                 binding2.TextView.setText("Title: " + title);
                                 */
                                 binding.poster.setImageBitmap(image);
-                                binding.test.setText("AIDS");
+                                binding.test.setText(plot);
 
                             });
                             Toast.makeText(getApplicationContext(),"This is the title value"+title,Toast.LENGTH_SHORT).show();
@@ -144,8 +157,9 @@ public class MoviesActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(@NonNull MyRowHolder holder, int position) {
                 holder.content.setText("");
-                MovieDetails obj = details.get(position);
-                holder.content.setText(obj.getContent());
+                MovieInfo obj = details.get(position);
+                holder.content.setText(obj.getTitle());
+                //add others?
             }
 
             @Override
