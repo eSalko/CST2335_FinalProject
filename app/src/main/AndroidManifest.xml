@@ -4,6 +4,7 @@
     package="algonquin.cst2335.cst2335_finalproject">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -18,7 +19,22 @@
             android:name=".HighlightsActivity"
             android:exported="false" />
         <activity
+            android:name=".FavPexels"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".MainHighlightsActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".Pexels"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
