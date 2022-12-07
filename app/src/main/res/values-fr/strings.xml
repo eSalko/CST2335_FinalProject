@@ -6,4 +6,6 @@
     <string name="search_btn">Recherche Pexels</string>
     <string name="fav_text">Allez dans vos favoris</string>
     <string name="about_text">À propos</string>
+    <string name="welcome">Bien Venus</string>
+    <string name="start">Regarder a les Highlights</string>
 </resources>

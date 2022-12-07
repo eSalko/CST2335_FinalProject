@@ -1,8 +1,13 @@
 <resources>
     <string name="app_name">CST2335_FinalProject</string>
+
+    <string name="welcome">Welcome!</string>
+    <string name="start">Look at Highlights</string>
+
     <string name="hint_text">Enter your search query here</string>
     <string name="search_text">Search for something below:</string>
     <string name="search_btn">Pexels Search</string>
     <string name="about_text">About</string>
     <string name="fav_text">Go to your favourites</string>
+
 </resources>
