@@ -11,7 +11,7 @@ import java.util.List;
 public interface matchDAO {
 
     @Insert
-    public void insertMatch(match i);
+    public void insertMatch(match m);
 
     @Query("SELECT * FROM `match`")
     public List<match> getAllMatches();

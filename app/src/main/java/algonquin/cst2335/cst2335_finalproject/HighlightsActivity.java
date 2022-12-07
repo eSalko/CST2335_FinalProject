@@ -4,10 +4,16 @@ import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.service.autofill.FieldClassification;
 import android.util.Log;
@@ -33,6 +39,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RecursiveAction;
 
 import algonquin.cst2335.cst2335_finalproject.databinding.ActivityHighlightsBinding;
@@ -40,11 +48,13 @@ import algonquin.cst2335.cst2335_finalproject.databinding.GameTitleBinding;
 
 public class HighlightsActivity extends AppCompatActivity {
 
-//    ArrayList<match> matches= new ArrayList<>();
     RecyclerView recyclerView;
-    List<match> matches;
-    Adapter adapter;
+    ArrayList<match> matches;
+    MatchViewModel matchModel;
+    matchDAO mDAO;
+    String urlButton;
     private static String stringURL = "https://www.scorebat.com/video-api/v1/";
+    private RecyclerView.Adapter myAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +62,40 @@ public class HighlightsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_highlights);
         recyclerView = findViewById(R.id.recyclerView);
         ActivityHighlightsBinding binding = ActivityHighlightsBinding.inflate(getLayoutInflater());
-        matches = new ArrayList<>();
+        setSupportActionBar(binding.toolBar);
+        matches = new ArrayList<match>();
+
+        //db
+        MatchDB db = Room.databaseBuilder(getApplicationContext(), MatchDB.class, "Match Database").build();
+        mDAO = db.mDAO();
+
+        if(matches == null) {
+            matchModel.matches.setValue(matches = new ArrayList<>());
+            Executor thread = Executors.newSingleThreadExecutor();
+
+            thread.execute(() ->{
+                matches.addAll(mDAO.getAllMatches());
+                binding.recyclerView.setAdapter(myAdapter);
+            });
+        }
+//        matchModel.selectedMatch.observe(this, (newItemValue) -> {
+//            FragmentManager fMgr = getSupportFragmentManager();
+//            FragmentTransaction tx = fMgr.beginTransaction();
+//            matchDetailsFragment chatFragment = new matchDetailsFragment(newItemValue);
+//        });
+
+
+        binding.urlBtn.setOnClickListener(clk -> {
+            try {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(stringURL));
+                startActivity(urlIntent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, "Cannot launch url/url not found", Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+
+        });
+
 
         extractMatches();
 
@@ -60,53 +103,6 @@ public class HighlightsActivity extends AppCompatActivity {
             extractMatches();
 //            adapter.notifyItemInserted(position);
         });
-
-
-
-//        binding.recyclerView.setAdapter(new RecyclerView.Adapter<MyRowHolder>() {
-//            @NonNull
-//            @Override
-//            public MyRowHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//                GameTitleBinding binding = GameTitleBinding.inflate(getLayoutInflater());
-//                return new MyRowHolder(binding.getRoot());
-//            }
-//
-//            @Override
-//            public void onBindViewHolder(@NonNull MyRowHolder holder, int position) {
-//
-//            }
-//
-//            @Override
-//            public int getItemCount() {
-//                return 0;
-//            }
-//        });
-
-
-        //getting JSON data
-//        binding.getMatchBtn.setOnClickListener(click -> {
-//            String url = "https://www.scorebat.com/video-api/v1/";
-//            RequestQueue queue = null;
-//
-//            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-//                    (response) ->{
-//                try {
-////                    JSONObject jsonObject = new JSONObject(response);
-////                    JSONArray matchArray = response.getJSONArray();
-//                    JSONObject compObject = response.getJSONObject("competition");
-//
-//                } catch (JSONException e){
-//                    e.printStackTrace();
-//                }
-//                    },
-//                    (error) -> {
-//
-//                    });
-//            queue = Volley.newRequestQueue(this);
-//            queue.add(request);
-//        });
-
-
     }//end of onCreate
 
     private void extractMatches() {
@@ -121,24 +117,15 @@ public class HighlightsActivity extends AppCompatActivity {
                         match match = new match();
                         match.setMatchTitle(matchObject.getString("title"));
                         match.setMatchDate(matchObject.getString("date"));
+                        match.setComp(matchObject.getJSONObject("competition").getString("name"));
                         match.setUrl(matchObject.getString("url"));
 
-//                        JSONObject compObject = response.getJSONObject("competition");
-//                        String comp = compObject.getString("name");
-
-
-
-
-
-
                         matches.add(match);
-
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-
 
                 recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
                 Adapter adapter = new Adapter(getApplicationContext(), matches);
@@ -154,19 +141,6 @@ public class HighlightsActivity extends AppCompatActivity {
 
     }
 
-//    class MyRowHolder extends RecyclerView.ViewHolder {
-//        TextView match;
-//        TextView date;
-//        TextView comp;
-//        TextView url;
-//
-//        public MyRowHolder(@NonNull View itemView) {
-//            super(itemView);
-//            match = itemView.findViewById(R.id.matchTitle);
-//            date = itemView.findViewById(R.id.matchDate);
-//
-//        }
-//    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

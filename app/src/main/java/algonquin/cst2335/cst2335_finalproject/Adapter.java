@@ -1,5 +1,6 @@
 package algonquin.cst2335.cst2335_finalproject;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder>{
         TextView matchTitle, matchDate, matchComp, matchURL;
         public ViewHolder(@NonNull View itemView){
             super(itemView);
+
+            itemView.setOnClickListener(clk -> {
+                int position = getAbsoluteAdapterPosition();
+
+            });
 
             matchTitle = itemView.findViewById(R.id.matchTitle);
             matchDate = itemView.findViewById(R.id.matchDate);

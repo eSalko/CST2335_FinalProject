@@ -11,7 +11,8 @@ import java.util.List;
 @Entity
 public class match {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    int id;
 
     @ColumnInfo(name = "title")
     private String matchTitle;
@@ -24,6 +25,8 @@ public class match {
 
     @ColumnInfo(name = "url")
     private String url;
+
+
 
     public match() {
         //default empty constructor

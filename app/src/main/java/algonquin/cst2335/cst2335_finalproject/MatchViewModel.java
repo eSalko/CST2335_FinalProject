@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 public class MatchViewModel extends ViewModel {
     public MutableLiveData<ArrayList<match>> matches = new MutableLiveData<>();
-    public MutableLiveData<match> match = new MutableLiveData<>();
+    public MutableLiveData<match> selectedMatch = new MutableLiveData<>();
 
 }
